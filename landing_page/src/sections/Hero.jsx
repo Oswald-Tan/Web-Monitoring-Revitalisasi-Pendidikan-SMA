@@ -11,7 +11,7 @@ const Hero = () => {
               Portal Monitoring Revitalisasi Infrastruktur Pendidikan
             </h2>
             <p className="text-xl mb-8 text-amber-100">
-              Memantau progress pembangunan dan renovasi 24 sekolah di Sulawesi Utara dan Gorontalo secara real-time
+              Memantau progress pembangunan dan renovasi 24 sekolah di Sulawesi Utara secara real-time
             </p>
             
             {/* Statistik Utama */}

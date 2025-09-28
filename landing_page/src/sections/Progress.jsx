@@ -1,143 +1,204 @@
-import React from 'react';
-import { CheckCircle, TrendingUp } from 'lucide-react';
+// components/Progress.jsx
+import React, { useState, useEffect } from "react";
+import { CheckCircle, TrendingUp, Loader } from "lucide-react";
+import axios from "axios";
+import { API_URL } from "../../../admin/src/config";
 
 const Progress = () => {
-  const progressData = [
-    { kabupaten: 'Manado', progress: 75 },
-    { kabupaten: 'Bitung', progress: 62 },
-    { kabupaten: 'Tomohon', progress: 95 },
-    { kabupaten: 'Minahasa', progress: 68 },
-    { kabupaten: 'Minahasa Utara', progress: 55 },
-    { kabupaten: 'Gorontalo', progress: 80 },
-  ];
+  const [progressData, setProgressData] = useState([]);
+  const [statusData, setStatusData] = useState({
+    status_count: [],
+    total_projects: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const completedProjects = [
-    {
-      school: 'SMA Negeri 1 Tomohon',
-      completion: '100%',
-      testimonial: 'Fasilitas baru sangat membantu proses pembelajaran siswa',
-      headmaster: 'Drs. Robert Mandagi, M.Pd'
-    },
-    {
-      school: 'SMA Negeri 5 Manado',
-      completion: '100%',
-      testimonial: 'Renovasi laboratorium memberikan dampak positif bagi siswa',
-      headmaster: 'Dr. Maria Toding, S.Pd'
-    },
-    {
-      school: 'SMA Negeri 2 Gorontalo',
-      completion: '100%',
-      testimonial: 'Kualitas infrastruktur sekarang jauh lebih baik',
-      headmaster: 'Ir. Yusuf Latief, M.T'
+  const fetchProgressData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch data progress per kabupaten
+      const progressResponse = await axios.get(
+        `${API_URL}/schools/progress/kabupaten`
+      );
+      setProgressData(progressResponse.data);
+
+      // Fetch data status proyek
+      const statusResponse = await axios.get(`${API_URL}/schools/status/count`);
+      setStatusData(statusResponse.data);
+    } catch (err) {
+      console.error("Error fetching progress data:", err);
+      setError("Gagal memuat data progress");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchProgressData();
+  }, []);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-500";
+      case "on-track":
+        return "bg-yellow-500";
+      case "delayed":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "completed":
+        return "Selesai";
+      case "on-track":
+        return "Progress";
+      case "delayed":
+        return "Terlambat";
+      default:
+        return status;
+    }
+  };
+
+  const getProgressColor = (progress) => {
+    if (progress >= 80) return "bg-green-600";
+    if (progress >= 60) return "bg-yellow-600";
+    return "bg-red-600";
+  };
+
+  if (loading) {
+    return (
+      <section id="progress" className="py-20 bg-white">
+        <div className="container mx-auto md:w-10/11 w-11/12">
+          <div className="flex justify-center items-center h-64">
+            <Loader className="w-8 h-8 animate-spin text-blue-600" />
+            <span className="ml-2 text-gray-600">Memuat data progress...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section id="progress" className="py-20 bg-white">
+        <div className="container mx-auto md:w-10/11 w-11/12">
+          <div className="text-center text-red-600">
+            <p>{error}</p>
+            <button
+              onClick={fetchProgressData}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Coba Lagi
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="progress" className="py-20 bg-white">
       <div className="container mx-auto md:w-10/11 w-11/12">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">Progress Real-time</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+            Progress Real-time
+          </h2>
           <p className="text-xl text-gray-600">
-            Pantau kemajuan pembangunan secara real-time dengan dashboard interaktif
+            Pantau kemajuan pembangunan secara real-time dengan dashboard
+            interaktif
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8 mb-16">
-          {/* Kurva S */}
+          {/* Progress per Kabupaten */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Kurva S Capaian Fisik</h3>
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">Kurva S Progress Chart</p>
-                <p className="text-sm text-gray-400">Data real-time dari lapangan</p>
-              </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">
+              Progress per Kabupaten
+            </h3>
+            <div className="space-y-4">
+              {progressData.length > 0 ? (
+                progressData.map((item, index) => (
+                  <div key={index} className="flex items-center">
+                    <div className="w-32 text-sm font-medium text-gray-700">
+                      {item.kabupaten}
+                    </div>
+                    <div className="flex-1 mx-4">
+                      <div className="w-full bg-gray-200 rounded-full h-4">
+                        <div
+                          className={`h-4 rounded-full ${getProgressColor(
+                            item.progress
+                          )}`}
+                          style={{ width: `${item.progress}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <div className="w-16 text-right text-sm font-medium text-gray-700">
+                      {item.progress}%
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center">
+                  Tidak ada data progress
+                </p>
+              )}
             </div>
           </div>
 
           {/* Pie Chart Status */}
           <div className="bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Status Proyek</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-4">
+              Status Proyek
+            </h3>
             <div className="h-64 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-green-200 to-blue-200 rounded-full flex items-center justify-center">
-                  <span className="text-2xl font-bold text-gray-700">78%</span>
+              {statusData.status_count.length > 0 ? (
+                <div className="text-center">
+                  <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-green-200 to-blue-200 rounded-full flex items-center justify-center">
+                    <span className="text-2xl font-bold text-gray-700">
+                      {statusData.status_count.find(
+                        (s) => s.status === "completed"
+                      )?.percentage || 0}
+                      %
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {statusData.status_count.map((statusItem, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center">
+                          <div
+                            className={`w-3 h-3 rounded-full mr-2 ${getStatusColor(
+                              statusItem.status
+                            )}`}
+                          ></div>
+                          <span className="text-sm">
+                            {getStatusLabel(statusItem.status)}
+                          </span>
+                        </div>
+                        <span className="text-sm font-medium">
+                          {statusItem.count}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="flex items-center justify-between border-t pt-2">
+                      <span className="text-sm font-medium">Total</span>
+                      <span className="text-sm font-medium">
+                        {statusData.total_projects}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-sm">Selesai</span>
-                    </div>
-                    <span className="text-sm font-medium">12</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
-                      <span className="text-sm">Progress</span>
-                    </div>
-                    <span className="text-sm font-medium">8</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
-                      <span className="text-sm">Terlambat</span>
-                    </div>
-                    <span className="text-sm font-medium">4</span>
-                  </div>
-                </div>
-              </div>
+              ) : (
+                <p className="text-gray-500">Tidak ada data status</p>
+              )}
             </div>
-          </div>
-        </div>
-
-        {/* Progress per Kabupaten */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-16">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Progress per Kabupaten</h3>
-          <div className="space-y-4">
-            {progressData.map((item, index) => (
-              <div key={index} className="flex items-center">
-                <div className="w-32 text-sm font-medium text-gray-700">{item.kabupaten}</div>
-                <div className="flex-1 mx-4">
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div 
-                      className={`h-4 rounded-full ${
-                        item.progress >= 80 ? 'bg-green-600' : 
-                        item.progress >= 60 ? 'bg-yellow-600' : 'bg-red-600'
-                      }`}
-                      style={{ width: `${item.progress}%` }}
-                    ></div>
-                  </div>
-                </div>
-                <div className="w-16 text-right text-sm font-medium text-gray-700">
-                  {item.progress}%
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Highlight Proyek */}
-        <div>
-          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">Proyek yang Telah Selesai</h3>
-          <div className="grid md:grid-cols-3 gap-8">
-            {completedProjects.map((project, index) => (
-              <div key={index} className="bg-white rounded-xl shadow-lg p-6 border-t-4 border-green-500">
-                <div className="flex items-center justify-between mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-500" />
-                  <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                    {project.completion}
-                  </span>
-                </div>
-                <h4 className="font-bold text-gray-900 mb-3">{project.school}</h4>
-                <blockquote className="text-gray-600 italic mb-4">
-                  "{project.testimonial}"
-                </blockquote>
-                <div className="text-sm text-gray-500">
-                  — {project.headmaster}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>

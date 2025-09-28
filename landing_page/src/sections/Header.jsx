@@ -45,7 +45,7 @@ const Header = ({
                 Program Revitalisasi
               </h1>
               <p className="md:text-sm text-xs text-gray-600">
-                SMA Sulut-Gorontalo 2025
+                SMA Sulut 2025
               </p>
             </div>
           </div>

@@ -35,7 +35,7 @@ const LandingPage = () => {
       <Program />
       <Sekolah />
       <Progress />
-      <Dokumen />
+      {/* <Dokumen /> */}
       <Tim />
       <FAQ />
       <Kontak />
