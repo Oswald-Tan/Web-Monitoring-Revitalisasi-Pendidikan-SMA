@@ -9,50 +9,45 @@ const User = db.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    fullname: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
-        len: [3, 30],
-      },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-      type: DataTypes.STRING,
-      allowNull: true,
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
     },
     phone_number: {
       type: DataTypes.STRING,
       allowNull: true,
     },
     password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
-        len: [8, 100],
-      },
+        type: DataTypes.STRING,
+        allowNull: false
     },
     role_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    prodiAdmin: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    prodiDosen: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    status: {
+     status: {
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",
+    },
+    foto_profil: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+      comment: "Path foto profil",
+    },
+    preferensi_notif: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: 'Pengaturan notifikasi (misal: {"email": true, "sms": false})',
+    },
+    last_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      comment: "Timestamp login terakhir",
     },
     resetOtp: {
       type: DataTypes.STRING,

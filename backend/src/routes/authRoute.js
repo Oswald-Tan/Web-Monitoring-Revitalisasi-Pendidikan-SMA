@@ -3,14 +3,14 @@ import {
   handleLogin,
   handleLogout,
   Me,
-  getDosenData,
   updatePassword,
   requestResetOtp,
   verifyResetOtp,
   resetPassword,
   getResetOtpExpiry,
+  updateProfile,
 } from "../controllers/authController.js";
-import { verifyUser } from "../middleware/authUser.js";
+import { verifyUser, adminOnly } from "../middleware/authUser.js";
 
 const router = express.Router();
 
@@ -22,6 +22,6 @@ router.post("/verify-reset-otp", verifyResetOtp);
 router.post("/reset-password", resetPassword);
 router.post("/get-reset-otp-expiry", getResetOtpExpiry);
 router.get("/me", Me);
-router.get("/dosen-data", getDosenData);
+router.patch("/update-profile", verifyUser, adminOnly, updateProfile);
 
 export default router;

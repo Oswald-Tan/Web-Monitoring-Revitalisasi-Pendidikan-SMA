@@ -3,21 +3,21 @@ import User from "../models/user.js";
 import Role from "../models/role.js";
 import transporter from "../config/email.js";
 import crypto from "crypto";
-import DetailsUsers from "../models/details_users.js";
 import { logAction } from "../middleware/auditMiddleware.js";
-import { DetailDosen, Dosen } from "../models/dosen.js";
 
 //handle login
 export const handleLogin = async (req, res) => {
   try {
+    // Validasi input
+    if (!req.body || !req.body.email || !req.body.password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    const { email, password } = req.body;
+
     const user = await User.findOne({
-      where: { username: req.body.username },
+      where: { email },
       include: [
-        {
-          model: DetailsUsers,
-          as: "userDetails",
-          attributes: ["photo_profile"],
-        },
         {
           model: Role,
           as: "userRole",
@@ -27,44 +27,37 @@ export const handleLogin = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (!user) {
-      // AUDIT LOG: Catat percobaan login gagal
       await logAction(
         req,
         "login_failed",
         "user",
         null,
-        `Percobaan login dengan username ${req.body.username}`
+        `Percobaan login dengan email ${email}`
       );
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (user.status !== "active") {
-      return res.status(403).json({ message: "Account is inactive." });
-    }
 
-    const match = await bcrypt.compare(req.body.password, user.password);
+    const match = await bcrypt.compare(password, user.password); // Gunakan variabel password
     if (!match) {
-      // AUDIT LOG: Catat percobaan password salah
       await logAction(
         req,
         "login_failed",
         "user",
         user.id,
-        `Password salah untuk username ${req.body.username}`,
+        `Password salah untuk email ${email}`,
         null,
-        { attempts: user.login_attempts } // Simpan jumlah percobaan
+        { attempts: user.login_attempts }
       );
       return res.status(400).json({ message: "Wrong Password" });
     }
 
     if (
-      user.userRole.role_name !== "admin_jurusan" &&
-      user.userRole.role_name !== "admin" &&
-      user.userRole.role_name !== "dosen"
+      user.userRole.role_name !== "super_admin" &&
+      user.userRole.role_name !== "admin_pusat" &&
+      user.userRole.role_name !== "admin_sekolah" &&
+      user.userRole.role_name !== "fasilitator" &&
+      user.userRole.role_name !== "koordinator"
     ) {
       await logAction(
         req,
@@ -78,10 +71,9 @@ export const handleLogin = async (req, res) => {
         .json({ message: "Access denied. Unauthorized role." });
     }
 
-    // Simpan session user
     req.session.userId = user.id;
+    req.session.role = user.userRole.role_name;
 
-    // AUDIT LOG: Catat login berhasil
     await logAction(
       req,
       "login",
@@ -90,29 +82,14 @@ export const handleLogin = async (req, res) => {
       `Login berhasil sebagai ${user.userRole.role_name}`
     );
 
-    // Ambil informasi yang akan dikirim ke frontend
-    const id = user.id;
-    const username = user.username;
-    const fullname = user.fullname;
-    const email = user.email;
-    const photo = user.userDetails?.photo_profile ?? null;
-    const role = user.userRole.role_name;
-
-    const prodiAdmin = user.prodiAdmin;
-    const prodiDosen = user.prodiDosen;
-
-    res
-      .status(200)
-      .json({
-        id,
-        username,
-        fullname,
-        email,
-        photo,
-        role,
-        prodiAdmin,
-        prodiDosen,
-      });
+    // PERBAIKAN: Hapus deklarasi ulang email
+    res.status(200).json({
+      id: user.id,
+      name: user.name,
+      email: user.email, // Langsung gunakan user.email
+      phone_number: user.phone_number,
+      role: user.userRole.role_name,
+    });
   } catch (error) {
     await logAction(
       req,
@@ -121,7 +98,7 @@ export const handleLogin = async (req, res) => {
       null,
       `Login error: ${error.message}`,
       null,
-      { username: req.body.username }
+      { email: req.body.email } // Gunakan req.body.email karena variabel email mungkin belum terdefinisi
     );
     console.error("Login Error:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -139,19 +116,12 @@ export const Me = async (req, res) => {
     const user = await User.findOne({
       attributes: [
         "id",
-        "fullname",
+        "name",
         "email",
-        "username",
+        "phone_number",
         "role_id",
-        "prodiAdmin",
-        "prodiDosen",
-      ], // ← Tambahkan "username"
+      ], 
       include: [
-        {
-          model: DetailsUsers,
-          as: "userDetails",
-          attributes: ["photo_profile"],
-        },
         {
           model: Role,
           as: "userRole",
@@ -168,13 +138,10 @@ export const Me = async (req, res) => {
     // Kirim data user lengkap
     res.status(200).json({
       id: user.id,
-      username: user.username,
-      fullname: user.fullname,
+      name: user.name,
       email: user.email,
-      photo: user.userDetails?.photo_profile ?? null,
+      phone_number: user.phone_number,
       role: user.userRole.role_name,
-      prodiAdmin: user.prodiAdmin,
-      prodiDosen: user.prodiDosen,
     });
   } catch (error) {
     console.error("Me error:", error);
@@ -182,80 +149,58 @@ export const Me = async (req, res) => {
   }
 };
 
-export const getDosenData = async (req, res) => {
+export const updateProfile = async (req, res) => {
+  const userId = req.session.userId;
+  
+  if (!userId) {
+    return res.status(401).json({ msg: "Unauthorized" });
+  }
+
   try {
-    // Verifikasi session
-    if (!req.session.userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
     }
 
-    const userId = req.session.userId;
-    console.log(`Fetching dosen data for user ID: ${userId}`);
+    const { name, email, phone_number } = req.body;
 
-    // Cek role user
-    const user = await User.findByPk(userId, {
+    // Validasi email unik (kecuali milik sendiri)
+    if (email && email !== user.email) {
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ msg: "Email already in use" });
+      }
+    }
+
+    // Update hanya field yang diizinkan
+    await user.update({
+      name: name || user.name,
+      email: email || user.email,
+      phone_number: phone_number || user.phone_number,
+    });
+
+    // Dapatkan data terbaru dengan role
+    const updatedUser = await User.findByPk(userId, {
+      attributes: ["id", "name", "email", "phone_number"],
       include: [{
         model: Role,
         as: "userRole",
         attributes: ["role_name"],
-      }]
+      }],
     });
 
-    if (!user) {
-      console.log(`User not found for ID: ${userId}`);
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Debug: log role yang didapat
-    console.log(`User role: ${JSON.stringify(user.userRole)}`);
-    
-    // Periksa jika userRole ada dan punya role_name
-    if (!user.userRole || user.userRole.role_name.toLowerCase() !== "dosen") {
-      console.log(`User role is not dosen: ${user.userRole ? user.userRole.role_name : 'no role'}`);
-      return res.status(403).json({ message: "Forbidden for non-dosen role" });
-    }
-
-    // Ambil data dosen berdasarkan user ID
-    const dosen = await Dosen.findOne({
-      where: { userId: userId },
-      include: [{
-        model: DetailDosen,
-        as: "detailDosen",
-        required: false // Ini yang penting, biarkan false agar tetap return data dosen meski detail kosong
-      }]
+    res.json({
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone_number: updatedUser.phone_number,
+      role: updatedUser.userRole.role_name,
     });
-
-    if (!dosen) {
-      console.log(`Data dosen utama tidak ditemukan untuk user ID: ${userId}`);
-      return res.status(404).json({ message: "Data dosen tidak ditemukan" });
-    }
-
-    // Format data yang akan dikirim
-    const dosenData = {
-      id: dosen.id,
-      fullname: dosen.fullname,
-      nip: dosen.nip,
-      nidn: dosen.nidn,
-      jenisKelamin: dosen.jenisKelamin,
-      tempatLahir: dosen.tempatLahir,
-      tglLahir: dosen.tglLahir,
-      karpeg: dosen.karpeg,
-      cpns: dosen.cpns,
-      pns: dosen.pns,
-      jurusan: dosen.jurusan,
-      prodi: dosen.prodi,
-      foto: dosen.foto,
-      asKaprodi: dosen.asKaprodi,
-      detailDosen: dosen.detailDosen || null, // Berikan array kosong jika null
-    };
-
-    console.log(`Mengembalikan data dosen untuk ID: ${dosen.id}`);
-    res.status(200).json(dosenData);
   } catch (error) {
-    console.error("Dosen data error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ msg: error.message });
   }
 };
+
 
 export const updatePassword = async (req, res) => {
   const id = req.params.id;
