@@ -8,7 +8,7 @@ const Card = ({
   count, 
   icon, 
   iconColor = "text-blue-500",
-  to = "/" // Prop baru untuk link tujuan
+  to = "/" 
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -34,9 +34,7 @@ const Card = ({
       className="block"
     >
       <div 
-        className={`flex flex-col p-5 bg-white dark:bg-[#282828] rounded-3xl relative overflow-hidden transition-all duration-300 ${
-          isHovered ? "shadow-lg" : "shadow"
-        }`}
+        className={`flex flex-col p-5 bg-white dark:bg-[#282828] rounded-3xl relative overflow-hidden transition-all duration-300`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -60,7 +58,7 @@ const Card = ({
         ></div>
         
         <div className="mt-10">
-          <h5 className="text-sm text-gray-700 dark:text-white uppercase">{title}</h5>
+          <h5 className="text-sm text-slate-600 dark:text-white uppercase">{title}</h5>
           <p className="text-[40px] font-normal text-gray-900 dark:text-white mt-4">{count}</p>
         </div>
       </div>
@@ -73,11 +71,7 @@ Card.propTypes = {
   count: PropTypes.number.isRequired,
   icon: PropTypes.element.isRequired,
   iconColor: PropTypes.string,
-  to: PropTypes.string, // Prop baru untuk link
-};
-
-Card.defaultProps = {
-  to: "/", // Default link ke homepage
+  to: PropTypes.string, 
 };
 
 export default Card;

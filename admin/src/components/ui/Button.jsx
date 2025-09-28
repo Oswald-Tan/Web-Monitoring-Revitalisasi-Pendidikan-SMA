@@ -2,8 +2,8 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 const Button = ({ text, icon, iconPosition = "left", onClick, className, to, width }) => {
-  const buttonClasses = `flex items-center justify-center gap-2 px-4 py-3 text-xs rounded-lg text-white
-    transition-all duration-150 ${className} 
+  const buttonClasses = `flex items-center justify-center gap-2 px-4 py-2 text-xs text-white font-medium px-6 py-2.5 rounded-xl transition-all duration-200 shadow-lg
+    transform hover:scale-105 ${className} 
     ${width ? width : 'w-auto'} whitespace-nowrap`;
 
   const content = (

@@ -47,18 +47,18 @@ const PieChartProdi = () => {
   // Hitung total untuk persentase
   const total = data.reduce((sum, item) => sum + item.value, 0);
 
-  if (loading) return <div className="text-center py-10 dark:text-white">Memuat data...</div>;
+  if (loading) return <div className="text-center py-1">Memuat data...</div>;
   if (error)
     return <div className="text-center text-red-500 py-10">{error}</div>;
 
   return (
-    <div className="bg-white dark:bg-[#282828] p-4 rounded-3xl w-full">
-      <h2 className="text-xl font-semibold mb-4 text-center dark:text-white">
+    <div className="bg-white p-4 rounded-3xl w-full">
+      <h2 className="text-xl font-semibold mb-4 text-cente">
         Distribusi Mahasiswa per Program Studi
       </h2>
 
       {data.length === 0 ? (
-        <p className="text-center dark:text-white">Tidak ada data mahasiswa</p>
+        <p className="text-cente">Tidak ada data mahasiswa</p>
       ) : (
         <div className="flex flex-col items-center">
           {/* Chart Area */}
@@ -111,7 +111,7 @@ const PieChartProdi = () => {
                         ? ((data[index]?.value / total) * 100).toFixed(1) 
                         : '0.0';
                       return (
-                        <span className="text-gray-700 text-sm dark:text-white">
+                        <span className="text-gray-700 text-s">
                           {data[index]?.name} ({percent}%)
                         </span>
                       );
@@ -134,13 +134,13 @@ const PieChartProdi = () => {
                   return (
                     <div
                       key={`mobile-legend-${index}`}
-                      className="flex items-center bg-gray-100 dark:bg-[#3f3f3f] px-3 py-1.5 rounded-full"
+                      className="flex items-center bg-gray-100 px-3 py-1.5 rounded-full"
                     >
                       <div
                         className="w-3 h-3 rounded-full mr-2"
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       ></div>
-                      <span className="text-xs text-gray-700 dark:text-white">
+                      <span className="text-xs text-gray-70">
                         {entry.name} <span className="font-medium">({percent}%)</span>
                       </span>
                     </div>

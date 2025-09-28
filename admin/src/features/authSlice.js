@@ -4,11 +4,9 @@ import { API_URL } from "../config";
 
 const initialState = {
   user: null,
-  dosen: null,
   isError: false,
   isSuccess: false,
   isLoading: false,
-  isDosenLoading: false,
   message: "",
 };
 
@@ -17,7 +15,7 @@ export const LoginUser = createAsyncThunk(
   async (user, thunkAPI) => {
     try {
       const res = await axios.post(`${API_URL}/auth/handle-login`, {
-        username: user.username,
+        email: user.email,
         password: user.password,
       });
       return res.data;
@@ -42,17 +40,19 @@ export const getMe = createAsyncThunk("user/getMe", async (_, thunkAPI) => {
   }
 });
 
-export const fetchDosenData = createAsyncThunk(
-  "auth/fetchDosenData",
-  async (_, thunkAPI) => {
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (formData, thunkAPI) => {
     try {
-      const res = await axios.get(`${API_URL}/auth/dosen-data`);
-      return res.data;
+      const response = await axios.patch(
+        `${API_URL}/auth/update-profile`,
+        formData
+      );
+      console.log(response.data);
+      return response.data;
     } catch (error) {
-      if (error.response) {
-        const message = error.response.data.message || error.response.data.msg;
-        return thunkAPI.rejectWithValue(message);
-      }
+      const message = error.response?.data?.msg || error.message;
+      return thunkAPI.rejectWithValue(message);
     }
   }
 );
@@ -97,16 +97,20 @@ export const authSlice = createSlice({
       state.message = action.payload;
     });
 
-     // Untuk fetchDosenData
-    builder.addCase(fetchDosenData.pending, (state) => {
-      state.isDosenLoading = true;
+    // Tambahkan di extraReducers
+    builder.addCase(updateProfile.pending, (state) => {
+      state.isLoading = true;
     });
-    builder.addCase(fetchDosenData.fulfilled, (state, action) => {
-      state.isDosenLoading = false;
-      state.dosen = action.payload;
+    builder.addCase(updateProfile.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.isSuccess = true;
+      state.user = {
+        ...state.user,
+        ...action.payload,
+      };
     });
-    builder.addCase(fetchDosenData.rejected, (state, action) => {
-      state.isDosenLoading = false;
+    builder.addCase(updateProfile.rejected, (state, action) => {
+      state.isLoading = false;
       state.isError = true;
       state.message = action.payload;
     });

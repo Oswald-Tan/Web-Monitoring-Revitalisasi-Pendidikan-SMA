@@ -44,19 +44,19 @@ const EventCharts = () => {
 
   if (loading)
     return (
-      <div className="text-center py-10 dark:text-white">Loading charts...</div>
+      <div className="text-center py-10">Loading charts...</div>
     );
 
   if (error)
     return (
-      <div className="text-center py-10 text-red-500 dark:text-red-400">
+      <div className="text-center py-10 text-red-500">
         Error: {error}
       </div>
     );
 
   if (!stats || !stats.statusStats)
     return (
-      <div className="text-center py-10 dark:text-white">No data available</div>
+      <div className="text-center py-10">No data available</div>
     );
 
   // Format data untuk chart status event
@@ -105,8 +105,8 @@ const EventCharts = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-1 gap-6 w-full">
       {/* Pie Chart: Status Event */}
-      {/* <div className="bg-white dark:bg-[#282828] p-4 rounded-3xl">
-        <h3 className="text-lg font-semibold mb-4 dark:text-white">Event Status Distribution</h3>
+      {/* <div className="bg-white p-4 rounded-3xl">
+        <h3 className="text-lg font-semibold mb-4">Event Status Distribution</h3>
         <ResponsiveContainer width="100%" height={isMobile ? 300 : 350}>
           <PieChart>
             <Pie
@@ -143,7 +143,7 @@ const EventCharts = () => {
                 fontSize: isMobile ? 12 : 14
               }}
               formatter={(value, entry, index) => (
-                <span className="text-gray-700 dark:text-white text-sm">
+                <span className="text-gray-700 text-sm">
                   {value} ({((statusData[index].value / statusData.reduce((a, b) => a + b.value, 0)) * 100).toFixed(0)}%)
                 </span>
               )}
@@ -153,8 +153,8 @@ const EventCharts = () => {
       </div> */}
 
       {/* Bar Chart: Monthly Events by Type */}
-      <div className="bg-white dark:bg-[#282828] p-4 rounded-3xl">
-        <h3 className="text-xl text-center font-semibold mb-4 dark:text-white">
+      <div className="bg-white p-4 rounded-3xl">
+        <h3 className="text-xl text-center font-semibold mb-4">
           Events per Month by Type
         </h3>
         <ResponsiveContainer width="100%" height={isMobile ? 300 : 400}>
@@ -212,7 +212,7 @@ const EventCharts = () => {
                 fontSize: isMobile ? 12 : 14,
               }}
               formatter={(value) => (
-                <span className="text-gray-700 dark:text-white text-sm">
+                <span className="text-gray-700 text-sm">
                   {value}
                 </span>
               )}
@@ -243,8 +243,8 @@ const EventCharts = () => {
       </div>
 
       {/* Pie Chart: Global Attendance */}
-      {/* <div className="bg-white dark:bg-[#282828] p-4 rounded-3xl">
-        <h3 className="text-xl text-center font-semibold mb-4 dark:text-white">
+      {/* <div className="bg-white p-4 rounded-3xl">
+        <h3 className="text-xl text-center font-semibold mb-4">
           Global Attendance Status
         </h3>
         <div className="w-full" style={{ height: isMobile ? 300 : 350 }}>
@@ -293,7 +293,7 @@ const EventCharts = () => {
                       ? ((attendanceData[index].value / total) * 100).toFixed(0)
                       : 0;
                   return (
-                    <span className="text-gray-700 dark:text-white text-sm">
+                    <span className="text-gray-700 text-sm">
                       {attendanceData[index]?.name} ({percent}%)
                     </span>
                   );

@@ -1,6 +1,6 @@
 {
   "name": "admin",
-  "private": true,
+  "homepage": ".",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -16,6 +16,8 @@
     "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "framer-motion": "^12.18.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.2",
     "lucide-react": "^0.525.0",
     "luxon": "^3.6.1",
     "react": "^19.1.0",

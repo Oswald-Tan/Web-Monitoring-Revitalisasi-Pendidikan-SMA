@@ -2,12 +2,12 @@ import { Link } from 'react-router-dom';
 
 const NotFoundPage = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center px-4">
       <div className="max-w-lg w-full text-center space-y-8">
         {/* Illustrasi */}
         <div className="flex justify-center">
           <svg
-            className="w-64 h-64 text-indigo-600 dark:text-indigo-400"
+            className="w-64 h-64 text-indigo-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -24,11 +24,11 @@ const NotFoundPage = () => {
 
         {/* Konten Teks */}
         <div className="space-y-4">
-          <h1 className="text-9xl font-bold text-gray-900 dark:text-white">404</h1>
-          <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-200">
+          <h1 className="text-9xl font-bold text-gray-900">404</h1>
+          <h2 className="text-3xl font-semibold text-gray-800">
             Oops! Page not found
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-600">
             The page your&apos;re looking for dosn&apos;nt exist or has been moved. 
             Please return to the homepage.
           </p>
@@ -39,8 +39,7 @@ const NotFoundPage = () => {
           to="/"
           className="inline-block px-6 py-3 text-white bg-indigo-600 rounded-md 
           hover:bg-indigo-700 transition-colors duration-300 font-medium
-          focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2
-          dark:focus:ring-offset-gray-900"
+          focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
         >
           Go Back Home
         </Link>

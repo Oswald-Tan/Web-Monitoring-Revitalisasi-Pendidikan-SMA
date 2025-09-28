@@ -10,7 +10,7 @@ const ButtonAction = ({ text, icon, iconPosition = "left", onClick, className, t
     </>
   );
 
-  const buttonClasses = `flex items-center justify-center px-3 py-2 text-sm rounded-lg text-white transition-all duration-150 ${className} ${width ? width : 'w-auto'}`;
+  const buttonClasses = `flex items-center justify-center text-sm px-3 py-2 text-white rounded-lg transition-all duration-200 hover:scale-110 shadow-md hover:shadow-lg ${className} ${width ? width : 'w-auto'}`;
 
   if (to) {
     return (
